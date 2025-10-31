@@ -15,10 +15,10 @@ Minimal bot that answers course/assignment questions using OpenAI with `syllabus
 - Edit `syllabus.md` with your course policies or grading criteria (this text is sent with each query)
 
 ## 3. Deploy backend to Deno
-- Sign in at https://dash.deno.com → **+ New Project** → **Import from GitHub**
+- Sign in at https://dash.deno.com → **+ New Project** → **Add Github Account** → **Install Deno** -> Click linked account
 - Select your repo
-- Entry point: `main.ts`
 - Production branch: `main`
+- Entry point: `main.ts`
 - Create the project (you'll get a `https://<name>.deno.dev` URL)
 
 ## 4. Add environment variables
@@ -30,6 +30,12 @@ In **Deno → Settings → Environment Variables**, add:
     QUALTRICS_SURVEY_ID=(optional)
     QUALTRICS_DATACENTER=(optional, e.g., uwo.eu)
     OPENAI_MODEL=(optional, default gpt-4o-mini)
+
+Qualtrics variables can be accessed through: 
+- **Qualtrics -> Creat New Project -> Survey Flow** -> Add Two **Embedded Data (repsonseText, QueryText) -> Apply**
+- Go back to homepage and activate the survey
+- Get SURVEY_ID from URL
+- Generate API_TOKEN from user settings
 
 ## 5. Point the frontend to your backend
 In `index.html`, replace the fetch URL with your Deno URL, e.g.:
