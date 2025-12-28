@@ -25,37 +25,107 @@
   </style>
 </head>
 <body>
-  <h2>Sample Syllabus Query Page</h2>
-  <form id="queryForm">
-    <textarea name="query" id="query" rows="5" cols="60" placeholder="Type your question here..."></textarea><br />
-    <button type="submit">Submit</button>
-  </form>
-  <h3>Response:</h3>
- <h5> all queries and responses are anonymously recorded by qualitrics for feedback, research and improvement</h5>
-  <pre id="response"></pre>
+    <h2>Course Assistant</h2>
+    <label for="botMode"><strong>Select a function:</strong></label>
+    <br />
+    <select id="botMode">
+        <option value="syllabus">Syllabus Q&amp;A</option>
+        <option value="midterm">Midterm Q&amp;A</option>
+        <option value="final">Final Q&amp;A</option>
+    </select>
+    <hr />
 
-  <script>
+    <form id="queryForm">
+        <div id="syllabusInputs">
+            <h3>Syllabus Query Page</h3>
+            <label for="syllabusQuestion">Ask a question about the syllabus:</label><br />
+            <textarea
+                    id="syllabusQuestion"
+                    rows="5"
+                    placeholder="Type your syllabus question here..."
+            ></textarea>
+        </div>
+        <div id="midtermInputs" style="display: none;">
+            <h3>Midterm Query Page</h3>
+            <label for="midtermQuestion">Ask a question about the midterm:</label><br />
+            <textarea
+                    id="midtermQuestion"
+                    rows="5"
+                    placeholder="Type your midterm question here..."
+            ></textarea>
+        </div>
+        <div id="finalInputs" style="display: none;">
+            <h3>Final Exam Query Page</h3>
+            <label for="finalQuestion">Ask a question about the final exam:</label><br />
+            <textarea
+                    id="finalQuestion"
+                    rows="5"
+                    placeholder="Type your final exam question here..."
+            ></textarea>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+    <h3>Response:</h3>
+    <h5> all queries and responses are anonymously recorded by qualitrics for feedback, research and improvement</h5>
+    <pre id="response"></pre>
+    <script>
+    const botMode = document.getElementById("botMode");
+    const syllabusInputs = document.getElementById("syllabusInputs");
+    const midtermInputs = document.getElementById("midtermInputs");
+    const finalInputs = document.getElementById("finalInputs");
     const form = document.getElementById("queryForm");
     const responseBox = document.getElementById("response");
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      responseBox.textContent = "Loading...";
-      const query = document.getElementById("query").value;
+    botMode.addEventListener("change", () => {
+        if (botMode.value === "syllabus") {
+            syllabusInputs.style.display = "block";
+            finalInputs.style.display = "none";
+            midtermInputs.style.display = "none";
+        } else if (botMode.value === "midterm") {
+            syllabusInputs.style.display = "none";
+            finalInputs.style.display = "none";
+            midtermInputs.style.display = "block";
+        } else {
+            syllabusInputs.style.display = "none";
+            finalInputs.style.display = "block";
+            midtermInputs.style.display = "none";
+        }
 
-      try {
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        responseBox.textContent = "Loading...";
+
+        const mode = document.getElementById("botMode").value;
+        let payload = { mode };
+
+        if (mode === "syllabus") {
+          payload.question = document.getElementById("syllabusQuestion").value;
+        }
+        if (mode === "midterm") {
+          payload.question = document.getElementById("midtermQuestion").value;
+        }
+        if (mode === "final") {
+          payload.question = document.getElementById("finalQuestion").value;
+        }
+
+        try {
         const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query }),
+          body: JSON.stringify(payload),
         });
 
         const text = await res.text();
         responseBox.textContent = text;
-      } catch (err) {
+        } catch (err) {
         responseBox.textContent = "Error contacting server.";
-      }
+        }
     });
-  </script>
+
+
+    </script>
 </body>
 </html>

@@ -24,34 +24,66 @@ serve(async (req: Request): Promise<Response> => {
     return new Response("Method Not Allowed", { status: 405 });
   }
 
-  let body: { query: string };
+  type RequestBody = {
+    mode: string;
+    question?: string;
+  };
+
+  let body: RequestBody;
   try {
     body = await req.json();
   } catch {
     return new Response("Invalid JSON", { status: 400 });
   }
 
+  if (!body.mode || !body.question) {
+    return new Response("Missing mode or question", { status: 400 });
+  }
+
   if (!OPENAI_API_KEY) {
     return new Response("Missing OpenAI API key", { status: 500 });
   }
 
-  const syllabus = await Deno.readTextFile("syllabus.md").catch(() =>
-    "Error loading syllabus."
-  );
+  let inputFile = "";
+  let inputFileLabel = "";
+
+  try {
+    switch (body.mode) {
+      case "syllabus":
+        inputFile = await Deno.readTextFile("syllabus.md");
+        inputFileLabel = "syllabus file";
+        break;
+
+      case "midterm":
+        inputFile = await Deno.readTextFile("midterm.md");
+        inputFileLabel = "midterm file";
+        break;
+
+      case "final":
+        inputFile = await Deno.readTextFile("final.md");
+        inputFileLabel = "final exam file";
+        break;
+
+      default:
+        return new Response("Unknown mode", { status: 400 });
+    }
+  } catch {
+    return new Response(`Error loading ${inputFileLabel}`, { status: 500 });
+  }
 
   const messages = [
     {
       role: "system",
       content:
-        "You are an accurate assistant. Always include a source URL if possible."
+          "You are an accurate course assistant. Answer using ONLY the provided context.",
     },
     {
       role: "system",
-      content: `Here is important context from syllabus.md:\n${syllabus}`,
+      content: `Here is important context from ${inputFileLabel}:\n\n${inputFile}`,
     },
     {
       role: "user",
-      content: body.query,
+      content: body.question,
     },
   ];
 
@@ -78,7 +110,7 @@ serve(async (req: Request): Promise<Response> => {
     const qualtricsPayload = {
       values: {
         responseText: result,
-        queryText: body.query,
+        queryText: body.question,
       },
     };
 
