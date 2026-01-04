@@ -8,6 +8,11 @@
     body {
       font-family: 'Lato', sans-serif;
       margin: 2rem;
+      min-height: 100vh;
+      background: linear-gradient(0deg, #d4b6fb 0%, #ffffff 100%);
+    }
+    h1, h2 {
+      color: #4F2683; /* purple */
     }
     textarea {
       font-family: monospace;
@@ -27,57 +32,66 @@
 <body>
     <h2>Course Assistant</h2>
     <label for="botMode"><strong>Select a function:</strong></label>
-    <br />
     <select id="botMode">
         <option value="syllabus">Syllabus Q&amp;A</option>
         <option value="midterm">Midterm Q&amp;A</option>
         <option value="final">Final Q&amp;A</option>
     </select>
     <hr />
-
-    <form id="queryForm">
-        <div id="syllabusInputs">
-            <h3>Syllabus Query Page</h3>
-            <label for="syllabusQuestion">Ask a question about the syllabus:</label><br />
-            <textarea
-                    id="syllabusQuestion"
-                    rows="5"
-                    placeholder="Type your syllabus question here..."
-            ></textarea>
-        </div>
-        <div id="midtermInputs" style="display: none;">
-            <h3>Midterm Query Page</h3>
-            <label for="midtermQuestion">Ask a question about the midterm:</label><br />
-            <textarea
-                    id="midtermQuestion"
-                    rows="5"
-                    placeholder="Type your midterm question here..."
-            ></textarea>
-        </div>
-        <div id="finalInputs" style="display: none;">
-            <h3>Final Exam Query Page</h3>
-            <label for="finalQuestion">Ask a question about the final exam:</label><br />
-            <textarea
-                    id="finalQuestion"
-                    rows="5"
-                    placeholder="Type your final exam question here..."
-            ></textarea>
-        </div>
-
-        <button type="submit">Submit</button>
-    </form>
+    <div id="notAvailableMesg" style="display: none;">
+        <p><strong>This information is not yet available, please wait for announcements.</strong></p>
+    </div>
+    <div id="formContainer">
+        <form id="queryForm">
+            <div id="syllabusInputs">
+                <p><strong>Syllabus Query Page</strong></p>
+                <label for="syllabusQuestion">Ask a question about the syllabus:</label><br />
+                <textarea
+                        id="syllabusQuestion"
+                        rows="5"
+                        placeholder="Type your syllabus question here..."
+                ></textarea>
+            </div>
+            <div id="midtermInputs" style="display: none;">
+                <p><strong>Midterm Query Page</strong></p>
+                <label for="midtermQuestion">Ask a question about the midterm:</label><br />
+                <textarea
+                        id="midtermQuestion"
+                        rows="5"
+                        placeholder="Type your midterm question here..."
+                ></textarea>
+            </div>
+            <div id="finalInputs" style="display: none;">
+                <p><strong>Final Exam Query Page</strong></p>
+                <label for="finalQuestion">Ask a question about the final exam:</label><br />
+                <textarea
+                        id="finalQuestion"
+                        rows="5"
+                        placeholder="Type your final exam question here..."
+                ></textarea>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
     <h3>Response:</h3>
     <h5> all queries and responses are anonymously recorded by qualitrics for feedback, research and improvement</h5>
     <pre id="response"></pre>
     <script>
+    const MIDTERM_LOCKED = false;
+    const FINAL_LOCKED = true;
+
     const botMode = document.getElementById("botMode");
     const syllabusInputs = document.getElementById("syllabusInputs");
     const midtermInputs = document.getElementById("midtermInputs");
     const finalInputs = document.getElementById("finalInputs");
+    const notAvailableMesg = document.getElementById("notAvailableMesg");
+    const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("queryForm");
     const responseBox = document.getElementById("response");
 
     botMode.addEventListener("change", () => {
+        notAvailableMesg.style.display = "none";
+        formContainer.style.display = "block";
         if (botMode.value === "syllabus") {
             syllabusInputs.style.display = "block";
             finalInputs.style.display = "none";
@@ -85,13 +99,18 @@
         } else if (botMode.value === "midterm") {
             syllabusInputs.style.display = "none";
             finalInputs.style.display = "none";
-            midtermInputs.style.display = "block";
+            if(MIDTERM_LOCKED){
+                notAvailableMesg.style.display = "block";
+                formContainer.style.display = "none";
+            } else midtermInputs.style.display = "block";
         } else {
             syllabusInputs.style.display = "none";
-            finalInputs.style.display = "block";
             midtermInputs.style.display = "none";
+            if(FINAL_LOCKED){
+                notAvailableMesg.style.display = "block";
+                formContainer.style.display = "none";
+            } else finalInputs.style.display = "block";
         }
-
     });
 
     form.addEventListener("submit", async (e) => {

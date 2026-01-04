@@ -4,6 +4,7 @@ Minimal bot that answers course/assignment questions using OpenAI with `syllabus
 
 ## Features
 - Accepts free-text questions
+- Combines three bots together and allows user to select the specific bot
 - Calls OpenAI with `syllabus.md`
 - Optionally logs `{queryText, responseText}` to Qualtrics
 - Works as a standalone web page or Brightspace embed
@@ -12,8 +13,8 @@ Minimal bot that answers course/assignment questions using OpenAI with `syllabus
 - Use this template on GitHub (e.g., `syllabus-bot-3210`, `paragraph-marker`)
 
 ## 2. Replace syllabus content
-- Edit `syllabus.md` with your course policies or grading criteria (this text is sent with each query)
-
+- Edit `syllabus.md` and `midterm.md` and `final.md` with your course policies and course information (this text is sent with each query)
+- ***Please do not change the file names, only edit the content.
 ## 3. Deploy backend to Deno
 - Sign in at https://dash.deno.com → **+ New Project** → **Add Github Account** → **Install Deno** -> Click linked account
 - Select your repo
@@ -52,6 +53,10 @@ In `index.html`, replace the fetch URL with your Deno URL, e.g.:
 - Use the published URL (e.g., `https://yourusername.github.io/yourbot/`)
 - For Brightspace, you can also paste `brightspace.html` as a content item or widget
 
+## 7. Enable or Disable bots
+- if there are multiple bots and you want to enable or disable bots. 
+- Edit `index.html` line 75 and 76. Change values to true if you want the bot to be locked (NOT showed on the page), false if you want to show the bots.
+- Save changes on GitHub, you don't have to deploy the webpage again. The changes will be automatically synced once you save.
 ## Notes
 - CORS headers are returned by `main.ts`, so the Brightspace iframe can call your backend.
 - Each deployment has its own backend; ensure the frontend fetch URL matches the correct Deno project.

@@ -7,6 +7,8 @@ const QUALTRICS_DATACENTER = Deno.env.get("QUALTRICS_DATACENTER");
 const SYLLABUS_LINK = Deno.env.get("SYLLABUS_LINK") || "";
 // New: allow model override, default to gpt-4o-mini
 const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+const MIDTERM_LOCKED = Deno.env.get("MIDTERM_LOCKED") === "true";
+const FINAL_LOCKED = Deno.env.get("FINAL_LOCKED") === "true";
 
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
