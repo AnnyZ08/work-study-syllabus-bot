@@ -54,8 +54,7 @@ In `index.html`, replace the fetch URL with your Deno URL, e.g.:
 - For Brightspace, you can also paste `brightspace.html` as a content item or widget
 
 ## 7. Enable or Disable bots
-- if there are multiple bots and you want to enable or disable bots. 
-- Edit `index.html` line 75 and 76. Change values to true if you want the bot to be locked (NOT showed on the page), false if you want to show the bots.
+- If there are multiple bots and you want to enable or disable bots, edit `index.html` line 98 and 99. Change values to true if you want the bot to be locked (NOT showed on the page), false if you want to show the bots.
 - Save changes on GitHub, you don't have to deploy the webpage again. The changes will be automatically synced once you save.
 ## Notes
 - CORS headers are returned by `main.ts`, so the Brightspace iframe can call your backend.
