@@ -1,12 +1,11 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const QUALTRICS_API_TOKEN = Deno.env.get("QUALTRICS_API_TOKEN");
 const QUALTRICS_SURVEY_ID = Deno.env.get("QUALTRICS_SURVEY_ID");
 const QUALTRICS_DATACENTER = Deno.env.get("QUALTRICS_DATACENTER");
 const SYLLABUS_LINK = Deno.env.get("SYLLABUS_LINK") || "";
-// New: allow model override, default to gpt-4o-mini
-const OPENAI_MODEL = Deno.env.get("OPENAI_MODEL") || "gpt-4o-mini";
+const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-1.5-flash";
 
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -40,8 +39,8 @@ serve(async (req: Request): Promise<Response> => {
     return new Response("Missing mode or question", { status: 400 });
   }
 
-  if (!OPENAI_API_KEY) {
-    return new Response("Missing OpenAI API key", { status: 500 });
+  if (!GEMINI_API_KEY) {
+    return new Response("Missing GEMINI API key", { status: 500 });
   }
 
   let inputFile = "";
@@ -71,37 +70,45 @@ serve(async (req: Request): Promise<Response> => {
     return new Response(`Error loading ${inputFileLabel}`, { status: 500 });
   }
 
-  const messages = [
-    {
-      role: "system",
-      content:
-          "You are an accurate course assistant. Answer using ONLY the provided context.",
-    },
-    {
-      role: "system",
-      content: `Here is important context from ${inputFileLabel}:\n\n${inputFile}`,
-    },
-    {
-      role: "user",
-      content: body.question,
-    },
-  ];
+  const prompt = `
+    INSTRUCTION:
+    You are an accurate course assistant.
+    Answer using ONLY the provided context.
+    If the answer is not in the context, say you do not know.
 
-  const openaiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    CONTEXT (from ${inputFileLabel}):
+    ${inputFile}
+
+    QUESTION:
+    ${body.question}
+  `.trim();
+
+  const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
+    {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
     },
     body: JSON.stringify({
-      model: OPENAI_MODEL,
-      messages,
-      max_tokens: 1500, // gives room for long answers
+        contents: [
+          {
+            role: "user",
+            parts: [
+            { text: prompt }
+            ],
+          },
+        ],
+        generationConfig: {
+          temperature: 0.2, // controls creativity
+          maxOutputTokens: 1500,
+        },
     }),
   });
 
-  const openaiJson = await openaiResponse.json();
-  const baseResponse = openaiJson?.choices?.[0]?.message?.content || "No response from OpenAI";
+  const geminiJson = await geminiResponse.json();
+  const baseResponse =
+      geminiJson?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "No response from Gemini";
   const result = `${baseResponse}\n\nThere may be errors in my responses; always refer to the course web page: ${SYLLABUS_LINK}`;
 
   let qualtricsStatus = "Qualtrics not called";
