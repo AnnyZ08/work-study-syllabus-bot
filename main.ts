@@ -7,6 +7,25 @@ const QUALTRICS_DATACENTER = Deno.env.get("QUALTRICS_DATACENTER");
 const SYLLABUS_LINK = Deno.env.get("SYLLABUS_LINK") || "";
 const GEMINI_MODEL = Deno.env.get("GEMINI_MODEL") || "gemini-2.5-flash";
 
+async function loadFolderAsContext(folderPath: string): Promise<string> {
+  let combined = "";
+
+  for await (const entry of Deno.readDir(folderPath)) {
+    if (entry.isFile) {
+      const content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
+      combined += `\n\n===== ${entry.name} =====\n\n${content}`;
+    }
+  }
+
+  // DEBUG: write combined output to file
+  await Deno.writeTextFile(
+    `${folderPath}_DEBUG_COMBINED.txt`,
+    combined
+  );
+
+  return combined;
+}
+
 serve(async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -54,20 +73,26 @@ serve(async (req: Request): Promise<Response> => {
         break;
 
       case "midterm":
-        inputFile = await Deno.readTextFile("midterm.md");
-        inputFileLabel = "midterm file";
-        break;
+          inputFile = await loadFolderAsContext("1026_midterm_test");
+          inputFileLabel = "midterm materials";
+          break;
 
       case "final":
-        inputFile = await Deno.readTextFile("final.md");
-        inputFileLabel = "final exam file";
-        break;
+          inputFile = await loadFolderAsContext("1026_final");
+          inputFileLabel = "final exam materials";
+          break;
 
       default:
         return new Response("Unknown mode", { status: 400 });
     }
   } catch {
     return new Response(`Error loading ${inputFileLabel}`, { status: 500 });
+  }
+
+  if (!inputFile || inputFile.trim().length === 0) {
+    return new Response("No materials available for this section yet.", {
+      status: 500,
+    });
   }
 
   const prompt = `
