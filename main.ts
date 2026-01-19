@@ -22,16 +22,13 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
     }
   }
 
-    const MAX_TOKENS = 100000;
+    const MAX_TOKENS = 200000;
     const estimatedTokens = Math.ceil(combined.length / 4);
 
-    console.log("[DEBUG] Estimated tokens:", estimatedTokens);
-
     if (estimatedTokens > MAX_TOKENS) {
+      console.log(`Context too large: ${estimatedTokens} tokens`);
       throw new Error(`Context too large: ${estimatedTokens} tokens`);
     }
-
-  console.log("Characters:", combined.length);
 
   return combined;
 }
@@ -83,11 +80,13 @@ serve(async (req: Request): Promise<Response> => {
         break;
 
       case "midterm":
-          inputFile = await loadFolderAsContext("1026_midterm_test");
+          console.log("Attempting to load folder:", "1026_midterm");
+          inputFile = await loadFolderAsContext("1026_midterm");
           inputFileLabel = "midterm materials";
           break;
 
       case "final":
+          console.log("Attempting to load folder:", "1026_final");
           inputFile = await loadFolderAsContext("1026_final");
           inputFileLabel = "final exam materials";
           break;

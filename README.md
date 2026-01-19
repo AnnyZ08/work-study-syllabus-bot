@@ -56,6 +56,11 @@ In `index.html`, replace the fetch URL with your Deno URL, e.g.:
 ## 7. Enable or Disable bots
 - If there are multiple bots and you want to enable or disable bots, edit `index.html` line 98 and 99. Change values to true if you want the bot to be locked (NOT showed on the page), false if you want to show the bots.
 - Save changes on GitHub, you don't have to deploy the webpage again. The changes will be automatically synced once you save.
+
+## 8. Adjust input token limit
+- I added a check for the input file size to prevent failing. The limit I set is 200k, based on the model I used. Feel free to set it to higher or lower based on different models.
+- Change the limit in `main.ts` line 25.
+
 ## Notes
 - CORS headers are returned by `main.ts`, so the Brightspace iframe can call your backend.
 - Each deployment has its own backend; ensure the frontend fetch URL matches the correct Deno project.
