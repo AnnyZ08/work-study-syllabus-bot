@@ -11,21 +11,21 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
   let combined = "";
 
   for await (const entry of Deno.readDir(folderPath)) {
-    console.log("in read directory");
     if (entry.isFile) {
-        try {
-          content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
-        } catch (err) {
-          console.error("Failed to read file:", entry.name, err);
-          continue; // skip this file instead of crashing
-        }
-      console.log(`${folderPath}/${entry.name}`);
-//       const content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
-      combined += `\n\n===== ${entry.name} =====\n\n${content}`;
-    } else throw new Error(`No files found in folder: ${folderPath}`);
-  });
 
-  console.log(`Folder ${folderPath}: loaded ${fileCount} files`);
+      let content: string;
+
+      try {
+        content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
+      } catch (err) {
+        console.error("Failed to read file:", entry.name, err);
+        continue; // skip this file instead of crashing
+      }
+
+      combined += `\n\n===== ${entry.name} =====\n\n${content}`;
+
+    }
+  }
 
   return combined;
 }
