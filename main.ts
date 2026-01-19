@@ -17,9 +17,9 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
 
       try {
         content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
+        console.log("read successfully", entry.name);
       } catch (err) {
         console.error("Failed to read file:", entry.name, err);
-        continue; // skip this file instead of crashing
       }
 
       combined += `\n\n===== ${entry.name} =====\n\n${content}`;
