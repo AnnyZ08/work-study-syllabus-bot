@@ -12,20 +12,26 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
 
   for await (const entry of Deno.readDir(folderPath)) {
     if (entry.isFile) {
-
       let content: string;
-
       try {
         content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
-        console.log("read successfully", entry.name);
       } catch (err) {
         console.error("Failed to read file:", entry.name, err);
       }
-
       combined += `\n\n===== ${entry.name} =====\n\n${content}`;
-
     }
   }
+
+    const MAX_TOKENS = 100000;
+    const estimatedTokens = Math.ceil(combined.length / 4);
+
+    console.log("[DEBUG] Estimated tokens:", estimatedTokens);
+
+    if (estimatedTokens > MAX_TOKENS) {
+      throw new Error(`Context too large: ${estimatedTokens} tokens`);
+    }
+
+  console.log("Characters:", combined.length);
 
   return combined;
 }
@@ -77,8 +83,6 @@ serve(async (req: Request): Promise<Response> => {
         break;
 
       case "midterm":
-          console.log("Attempting to load folder:", "1026_midterm_test");
-          console.log("CWD:", Deno.cwd());
           inputFile = await loadFolderAsContext("1026_midterm_test");
           inputFileLabel = "midterm materials";
           break;
