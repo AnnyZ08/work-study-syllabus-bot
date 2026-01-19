@@ -17,13 +17,7 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
       const content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
       combined += `\n\n===== ${entry.name} =====\n\n${content}`;
     } else throw new Error(`No files found in folder: ${folderPath}`);
-  }
-
-  // DEBUG: write combined output to file
-  await Deno.writeTextFile(
-    `${folderPath}_DEBUG_COMBINED.txt`,
-    combined
-  );
+  });
 
   console.log(`Folder ${folderPath}: loaded ${fileCount} files`);
 
