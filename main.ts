@@ -11,10 +11,12 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
   let combined = "";
 
   for await (const entry of Deno.readDir(folderPath)) {
+    console.log("in read directory");
     if (entry.isFile) {
+      console.log("is file");
       const content = await Deno.readTextFile(`${folderPath}/${entry.name}`);
       combined += `\n\n===== ${entry.name} =====\n\n${content}`;
-    }
+    } else throw new Error(`No files found in folder: ${folderPath}`);
   }
 
   // DEBUG: write combined output to file
@@ -22,6 +24,8 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
     `${folderPath}_DEBUG_COMBINED.txt`,
     combined
   );
+
+  console.log(`Folder ${folderPath}: loaded ${fileCount} files`);
 
   return combined;
 }
@@ -73,6 +77,8 @@ serve(async (req: Request): Promise<Response> => {
         break;
 
       case "midterm":
+          console.log("Attempting to load folder:", "1026_midterm_test");
+          console.log("CWD:", Deno.cwd());
           inputFile = await loadFolderAsContext("1026_midterm_test");
           inputFileLabel = "midterm materials";
           break;
