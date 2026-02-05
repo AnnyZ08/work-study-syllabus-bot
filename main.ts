@@ -22,7 +22,7 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
     }
   }
 
-    const MAX_TOKENS = 200000;
+    const MAX_TOKENS = 1000000;
     const estimatedTokens = Math.ceil(combined.length / 4);
 
     if (estimatedTokens > MAX_TOKENS) {
@@ -106,9 +106,11 @@ serve(async (req: Request): Promise<Response> => {
 
   const prompt = `
     INSTRUCTION:
-    You are an accurate course assistant.
-    Answer using ONLY the provided context.
-    If the answer is not in the context, say you do not know.
+    You are a precise academic assistant. Your goal is to provide accurate information based strictly on the provided context.
+
+    CONSTRAINTS:
+    1. Zero Outside Knowledge: Use ONLY the provided context. If the answer is not stated in the context, respond with: "I'm sorry, I don't have that information in the current course materials."
+    2. Source Attribution: You must always begin your response by stating the specific Lecture Name or Document Title where the information was found.
 
     CONTEXT (from ${inputFileLabel}):
     ${inputFile}
@@ -134,7 +136,7 @@ serve(async (req: Request): Promise<Response> => {
         ],
         generationConfig: {
           temperature: 0.2, // controls creativity
-          maxOutputTokens: 1500,
+          maxOutputTokens: 10000,
         },
     }),
   });
