@@ -49,11 +49,12 @@
 </head>
 <body>
     <h2>Political Science 1026 Chatbot</h2>
-    <h5>***All responses are drawn directly from course material: syllabus responses refer only to the syllabus,
-        while midterm and final exam responses are limited to their respective lecture materials.</h5>
+    <h5>***All responses are drawn directly from course material: syllabus responses use the syllabus only, EBO and Essay responses use the EBO and Essay Assignments Info only,
+        and midterm and final exam responses use the respective lecture materials only.</h5>
     <label for="botMode"><strong>Select a function:</strong></label>
     <select id="botMode">
         <option value="syllabus">Syllabus Q&amp;A</option>
+        <option value="eboEssay">EBO & Essay Q&amp;A</option>
         <option value="midterm">Midterm Q&amp;A</option>
         <option value="final">Final Q&amp;A</option>
     </select>
@@ -69,7 +70,16 @@
                 <textarea
                         id="syllabusQuestion"
                         rows="5"
-                        placeholder="Type your syllabus question here..."
+                        placeholder="Type your question here..."
+                ></textarea>
+            </div>
+            <div id="eboEssayInputs" style="display: none;">
+                <p><strong>EBO and Essay Query Page</strong></p>
+                <label for="eboEssayQuestion">Ask a question about EBO or Essay:</label><br />
+                <textarea
+                        id="eboEssayQuestion"
+                        rows="5"
+                        placeholder="Type your question here..."
                 ></textarea>
             </div>
             <div id="midtermInputs" style="display: none;">
@@ -78,7 +88,7 @@
                 <textarea
                         id="midtermQuestion"
                         rows="5"
-                        placeholder="Type your midterm question here..."
+                        placeholder="Type your question here..."
                 ></textarea>
             </div>
             <div id="finalInputs" style="display: none;">
@@ -87,7 +97,7 @@
                 <textarea
                         id="finalQuestion"
                         rows="5"
-                        placeholder="Type your final exam question here..."
+                        placeholder="Type your question here..."
                 ></textarea>
             </div>
             <button type="submit">Submit</button>
@@ -103,6 +113,7 @@
     const botMode = document.getElementById("botMode");
     const syllabusInputs = document.getElementById("syllabusInputs");
     const midtermInputs = document.getElementById("midtermInputs");
+    const eboEssayInputs = document.getElementById("eboEssayInputs");
     const finalInputs = document.getElementById("finalInputs");
     const notAvailableMesg = document.getElementById("notAvailableMesg");
     const formContainer = document.getElementById("formContainer");
@@ -116,9 +127,16 @@
             syllabusInputs.style.display = "block";
             finalInputs.style.display = "none";
             midtermInputs.style.display = "none";
+            eboEssayInputs.style.display = "none";
+        } else if (botMode.value === "eboEssay") {
+            syllabusInputs.style.display = "none";
+            finalInputs.style.display = "none";
+            midtermInputs.style.display = "none";
+            eboEssayInputs.style.display = "block";
         } else if (botMode.value === "midterm") {
             syllabusInputs.style.display = "none";
             finalInputs.style.display = "none";
+            eboEssayInputs.style.display = "none";
             if(MIDTERM_LOCKED){
                 notAvailableMesg.style.display = "block";
                 formContainer.style.display = "none";
@@ -126,6 +144,7 @@
         } else {
             syllabusInputs.style.display = "none";
             midtermInputs.style.display = "none";
+            eboEssayInputs.style.display = "none";
             if(FINAL_LOCKED){
                 notAvailableMesg.style.display = "block";
                 formContainer.style.display = "none";
@@ -142,6 +161,9 @@
 
         if (mode === "syllabus") {
           payload.question = document.getElementById("syllabusQuestion").value;
+        }
+        if (mode === "eboEssay") {
+          payload.question = document.getElementById("eboEssayQuestion").value;
         }
         if (mode === "midterm") {
           payload.question = document.getElementById("midtermQuestion").value;

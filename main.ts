@@ -79,6 +79,11 @@ serve(async (req: Request): Promise<Response> => {
         inputFileLabel = "syllabus file";
         break;
 
+      case "eboEssay":
+              inputFile = await Deno.readTextFile("eboEssay.md");
+              inputFileLabel = "EBO & Essay file";
+              break;
+
       case "midterm":
           console.log("Attempting to load folder:", "1026_midterm");
           inputFile = await loadFolderAsContext("1026_midterm");
