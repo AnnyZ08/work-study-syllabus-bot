@@ -122,7 +122,7 @@ Because the context is long:
 # RULES:
 - Use ONLY the provided context.
 - Do NOT use outside knowledge.
-- Begin your response by stating the specific Lecture Name or Document Title where the information was found.
+- Always begin your response by stating the specific Lecture Name or Document Title where the information was found.
 
 If and only if the information truly does not appear anywhere in the context, respond with:
 "I'm sorry, I don't have that information in the current course materials."
