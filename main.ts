@@ -110,18 +110,29 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   const prompt = `
-    INSTRUCTION:
-    You are a precise academic assistant. Your goal is to provide accurate information based strictly on the provided context.
+    # SYSTEM ROLE: You are an expert academic retrieval assistant. Your task is to locate and extract and summarize answers from a large academic data source.
 
-    CONSTRAINTS:
-    1. Zero Outside Knowledge: Use ONLY the provided context. If the answer is not stated in the context, respond with: "I'm sorry, I don't have that information in the current course materials."
-    2. Source Attribution: You must always begin your response by stating the specific Lecture Name or Document Title where the information was found.
+# PROCESS: 
+Because the context is long:
+1. Identify important keywords in the question.
+2. Search the entire context for matching or related phrases.
+3. Locate the exact document title or lecture section.
+4. Extract the relevant details directly from that section.
 
-    CONTEXT (from ${inputFileLabel}):
-    ${inputFile}
+# RULES:
+- Use ONLY the provided context.
+- Do NOT use outside knowledge.
+- Begin your response by stating the specific Lecture Name or Document Title where the information was found.
 
-    QUESTION:
-    ${body.question}
+If and only if the information truly does not appear anywhere in the context, respond with:
+"I'm sorry, I don't have that information in the current course materials."
+
+# BEGIN SOURCE CONTEXT (${inputFileLabel})
+${inputFile}
+# END SOURCE CONTEXT
+
+# QUESTION:
+${body.question}
   `.trim();
 
   const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
