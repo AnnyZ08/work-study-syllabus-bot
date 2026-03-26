@@ -34,6 +34,8 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
 }
 
 serve(async (req: Request): Promise<Response> => {
+    const url = new URL(req.url);
+
     if (req.method === "GET" && url.pathname === "/") {
       return new Response("OK", {
         status: 200,
