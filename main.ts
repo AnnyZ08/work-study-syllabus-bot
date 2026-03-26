@@ -34,6 +34,15 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
 }
 
 serve(async (req: Request): Promise<Response> => {
+    if (req.method === "GET" && url.pathname === "/") {
+      return new Response("OK", {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain",
+        },
+      });
+    }
+
   if (req.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
