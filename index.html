@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>1026 Query Bot</title>
+  <title>Syllabus Query Bot</title>
   <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet" />
   <style>
     body {
@@ -14,7 +14,7 @@
     h1, h2 {
       color: #4F2683; /* purple */
     }
-    #submit-button {
+    button {
       font-size: 0.9rem;
       font-weight: bold;
       padding: 0.3rem 1.1rem;
@@ -45,24 +45,18 @@
       border: 1px solid #ccc;
       max-width: 600px;
     }
-
-    #feedback-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
   </style>
 </head>
 <body>
     <h2>Political Science 1026 Chatbot</h2>
-    <h5>***All responses are drawn directly from course material: syllabus responses use the syllabus only, EBO and Essay responses use the EBO and Essay Assignments Info only,
-        and midterm and final exam responses use the respective lecture materials only.</h5>
+    <h5>***All responses are drawn directly from course materials on the course website: syllabus responses come from the syllabus only, EBO and Essay responses use the EBO and Essay Assignments Info only,
+        and midterm and final exam responses use the respective lecture content only.</h5>
     <label for="botMode"><strong>Select a function:</strong></label>
     <select id="botMode">
-        <option value="syllabus">Syllabus Q&amp;A</option>
-        <option value="eboEssay">EBO & Essay Q&amp;A</option>
-        <option value="midterm">Midterm Q&amp;A</option>
-        <option value="final">Final Q&amp;A</option>
+        <option value="syllabus">Syllabus Questions</option>
+        <option value="eboEssay">EBO & Essay Questions</option>
+        <option value="midterm">Midterm content</option>
+        <option value="final">Final content</option>
     </select>
     <hr />
     <div id="notAvailableMesg" style="display: none;">
@@ -106,18 +100,12 @@
                         placeholder="Type your question here..."
                 ></textarea>
             </div>
-            <button id="submit-button" type="submit">Submit</button>
+            <button type="submit">Submit</button>
         </form>
     </div>
     <h3>Response:</h3>
     <h5> all queries and responses are anonymously recorded by qualitrics for feedback, research and improvement</h5>
     <pre id="response"></pre>
-    <div id="feedback-container" style="display:none;">
-        <p>Was this response helpful?</p>
-        <button id="feedback-yes">Yes</button>
-        <button id="feedback-no">No</button>
-    </div>
-    <p id="feedback-thanks" style="display:none;">Thanks for your feedback!</p>
     <script>
     const MIDTERM_LOCKED = false;
     const FINAL_LOCKED = false;
@@ -131,16 +119,6 @@
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("queryForm");
     const responseBox = document.getElementById("response");
-
-    const feedbackContainer = document.getElementById("feedback-container");
-    const feedbackYesBtn = document.getElementById("feedback-yes");
-    const feedbackNoBtn = document.getElementById("feedback-no");
-    const feedbackThanks = document.getElementById("feedback-thanks");
-
-<!--    This is for second api call for helpful feedback response-->
-    let lastQuery = "";
-    let lastResponse = "";
-    let feedbackSubmitted = true;
 
     botMode.addEventListener("change", () => {
         notAvailableMesg.style.display = "none";
@@ -176,15 +154,7 @@
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
-<!--        for when student did not give feedback-->
-        if (!feedbackSubmitted && lastQuery && lastResponse) {
-          await sendFeedback("");
-        }
-
         responseBox.textContent = "Loading...";
-        feedbackContainer.style.display = "none";
-        feedbackThanks.style.display = "none";
-        lastResponse = "";
 
         const mode = document.getElementById("botMode").value;
         let payload = { mode };
@@ -202,10 +172,8 @@
           payload.question = document.getElementById("finalQuestion").value;
         }
 
-        lastQuery = payload.question;
-
         try {
-        const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
+        const res = await fetch("https://1026botall.deno.dev/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
@@ -213,44 +181,11 @@
 
         const text = await res.text();
         responseBox.textContent = text;
-        lastResponse = text;
-        feedbackContainer.style.display = "flex";
-        feedbackSubmitted = false;
         } catch (err) {
         responseBox.textContent = "Error contacting server.";
         }
     });
 
-    feedbackYesBtn.addEventListener("click", () => sendFeedback("Yes"));
-    feedbackNoBtn.addEventListener("click", () => sendFeedback("No"));
-
-    async function sendFeedback(helpful) {
-      try {
-        const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            isFeedbackOnly: true,
-            question: lastQuery,
-            responseText: lastResponse,
-            helpfulResponse: helpful
-          }),
-        });
-
-        const text = await res.text();
-        console.log("Feedback response from backend:", text);
-
-        feedbackSubmitted = true;
-
-        if(helpful === "Yes" || helpful === "No"){
-            feedbackContainer.style.display = "none";
-            feedbackThanks.style.display = "block";
-        }
-
-      } catch (err) {
-        console.error("Feedback error:", err);
-      }
-    }
 
     </script>
 </body>
