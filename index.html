@@ -14,7 +14,7 @@
     h1, h2 {
       color: #4F2683; /* purple */
     }
-    button {
+    #submit-button {
       font-size: 0.9rem;
       font-weight: bold;
       padding: 0.3rem 1.1rem;
@@ -44,6 +44,12 @@
       background: #f4f4f4;
       border: 1px solid #ccc;
       max-width: 600px;
+    }
+
+    #feedback-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
   </style>
 </head>
@@ -100,12 +106,17 @@
                         placeholder="Type your question here..."
                 ></textarea>
             </div>
-            <button type="submit">Submit</button>
+            <button id="submit-button" type="submit">Submit</button>
         </form>
     </div>
     <h3>Response:</h3>
     <h5> all queries and responses are anonymously recorded by qualitrics for feedback, research and improvement</h5>
     <pre id="response"></pre>
+    <div id="feedback-container" style="display:none;">
+        <p>Was this response helpful?</p>
+        <button id="feedback-yes">Yes</button>
+        <button id="feedback-no">No</button>
+    </div>
     <script>
     const MIDTERM_LOCKED = false;
     const FINAL_LOCKED = false;
@@ -119,6 +130,14 @@
     const formContainer = document.getElementById("formContainer");
     const form = document.getElementById("queryForm");
     const responseBox = document.getElementById("response");
+
+    const feedbackContainer = document.getElementById("feedback-container");
+    const feedbackYesBtn = document.getElementById("feedback-yes");
+    const feedbackNoBtn = document.getElementById("feedback-no");
+
+<!--    This is for second api call for helpful feedback response-->
+    let lastQuery = "";
+    let lastResponse = "";
 
     botMode.addEventListener("change", () => {
         notAvailableMesg.style.display = "none";
@@ -155,6 +174,8 @@
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         responseBox.textContent = "Loading...";
+        feedbackContainer.style.display = "none";
+        lastResponse = "";
 
         const mode = document.getElementById("botMode").value;
         let payload = { mode };
@@ -172,6 +193,8 @@
           payload.question = document.getElementById("finalQuestion").value;
         }
 
+        lastQuery = payload.question;
+
         try {
         const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
           method: "POST",
@@ -181,11 +204,37 @@
 
         const text = await res.text();
         responseBox.textContent = text;
+        lastResponse = text;
+        feedbackContainer.style.display = "flex";
         } catch (err) {
         responseBox.textContent = "Error contacting server.";
         }
     });
 
+    feedbackYesBtn.addEventListener("click", () => sendFeedback("Yes"));
+    feedbackNoBtn.addEventListener("click", () => sendFeedback("No"));
+
+    async function sendFeedback(helpful) {
+      try {
+        const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            isFeedbackOnly: true,
+            question: lastQuery,
+            responseText: lastResponse,
+            helpfulResponse: helpful
+          }),
+        });
+
+        const text = await res.text();
+        console.log("Feedback response from backend:", text);
+
+        feedbackContainer.innerHTML = "<p>Thanks for your feedback!</p>";
+      } catch (err) {
+        console.error("Feedback error:", err);
+      }
+    }
 
     </script>
 </body>

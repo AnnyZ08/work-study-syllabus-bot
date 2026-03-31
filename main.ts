@@ -60,8 +60,11 @@ serve(async (req: Request): Promise<Response> => {
   }
 
   type RequestBody = {
-    mode: string;
+    mode?: string;
     question?: string;
+    responseText?: string;
+    helpfulResponse?: string;
+    isFeedbackOnly?: boolean;
   };
 
   let body: RequestBody;
@@ -69,6 +72,59 @@ serve(async (req: Request): Promise<Response> => {
     body = await req.json();
   } catch {
     return new Response("Invalid JSON", { status: 400 });
+  }
+
+//   For helpful feedback response
+  if (body.isFeedbackOnly) {
+    console.log("Raw feedback body:", body);
+    console.log("Feedback field check:", {
+      question: body.question,
+      responseText: body.responseText,
+      helpfulResponse: body.helpfulResponse,
+      isQuestionMissing: !body.question,
+      isResponseMissing: !body.responseText,
+      isHelpfulMissing: !body.helpfulResponse,
+    });
+
+    if (!body.question || !body.responseText || !body.helpfulResponse) {
+      return new Response("Missing feedback data", { status: 400 });
+    }
+
+    if (!QUALTRICS_API_TOKEN || !QUALTRICS_SURVEY_ID || !QUALTRICS_DATACENTER) {
+      return new Response("Missing Qualtrics configuration", { status: 500 });
+    }
+
+    console.log("Feedback received:", {
+      question: body.question,
+      helpfulResponse: body.helpfulResponse,
+    });
+
+    const qualtricsPayload = {
+      values: {
+        queryText: body.question,
+        responseText: body.responseText,
+        helpfulResponse: body.helpfulResponse,
+      },
+    };
+
+    const qt = await fetch(
+      `https://${QUALTRICS_DATACENTER}.qualtrics.com/API/v3/surveys/${QUALTRICS_SURVEY_ID}/responses`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-TOKEN": QUALTRICS_API_TOKEN,
+        },
+        body: JSON.stringify(qualtricsPayload),
+      }
+    );
+
+    return new Response(`Feedback recorded. Qualtrics status: ${qt.status}`, {
+      headers: {
+        "Content-Type": "text/plain",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   }
 
   if (!body.mode || !body.question) {
@@ -173,32 +229,11 @@ ${body.question}
       "No response from Gemini";
   const result = `${baseResponse}\n\nThere may be errors in my responses; always refer to the course web page: ${SYLLABUS_LINK}`;
 
-  let qualtricsStatus = "Qualtrics not called";
-
-  if (QUALTRICS_API_TOKEN && QUALTRICS_SURVEY_ID && QUALTRICS_DATACENTER) {
-    const qualtricsPayload = {
-      values: {
-        responseText: result,
-        queryText: body.question,
-      },
-    };
-
-    const qt = await fetch(`https://${QUALTRICS_DATACENTER}.qualtrics.com/API/v3/surveys/${QUALTRICS_SURVEY_ID}/responses`, {
-      method: "POST",
+    return new Response(result, {
       headers: {
-        "Content-Type": "application/json",
-        "X-API-TOKEN": QUALTRICS_API_TOKEN,
+        "Content-Type": "text/plain",
+        "Access-Control-Allow-Origin": "*",
       },
-      body: JSON.stringify(qualtricsPayload),
     });
 
-    qualtricsStatus = `Qualtrics status: ${qt.status}`;
-  }
-
-  return new Response(`${result}\n<!-- ${qualtricsStatus} -->`, {
-    headers: {
-      "Content-Type": "text/plain",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
 });
