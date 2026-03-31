@@ -76,17 +76,8 @@ serve(async (req: Request): Promise<Response> => {
 
 //   For helpful feedback response
   if (body.isFeedbackOnly) {
-    console.log("Raw feedback body:", body);
-    console.log("Feedback field check:", {
-      question: body.question,
-      responseText: body.responseText,
-      helpfulResponse: body.helpfulResponse,
-      isQuestionMissing: !body.question,
-      isResponseMissing: !body.responseText,
-      isHelpfulMissing: !body.helpfulResponse,
-    });
 
-    if (!body.question || !body.responseText || !body.helpfulResponse) {
+    if (!body.question || !body.responseText || body.helpfulResponse === undefined || body.helpfulResponse === null) {
       return new Response("Missing feedback data", { status: 400 });
     }
 

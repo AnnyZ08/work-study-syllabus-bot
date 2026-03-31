@@ -117,6 +117,7 @@
         <button id="feedback-yes">Yes</button>
         <button id="feedback-no">No</button>
     </div>
+    <p id="feedback-thanks" style="display:none;">Thanks for your feedback!</p>
     <script>
     const MIDTERM_LOCKED = false;
     const FINAL_LOCKED = false;
@@ -134,10 +135,12 @@
     const feedbackContainer = document.getElementById("feedback-container");
     const feedbackYesBtn = document.getElementById("feedback-yes");
     const feedbackNoBtn = document.getElementById("feedback-no");
+    const feedbackThanks = document.getElementById("feedback-thanks");
 
 <!--    This is for second api call for helpful feedback response-->
     let lastQuery = "";
     let lastResponse = "";
+    let feedbackSubmitted = true;
 
     botMode.addEventListener("change", () => {
         notAvailableMesg.style.display = "none";
@@ -173,8 +176,14 @@
 
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+<!--        for when student did not give feedback-->
+        if (!feedbackSubmitted && lastQuery && lastResponse) {
+          await sendFeedback("");
+        }
+
         responseBox.textContent = "Loading...";
         feedbackContainer.style.display = "none";
+        feedbackThanks.style.display = "none";
         lastResponse = "";
 
         const mode = document.getElementById("botMode").value;
@@ -206,6 +215,7 @@
         responseBox.textContent = text;
         lastResponse = text;
         feedbackContainer.style.display = "flex";
+        feedbackSubmitted = false;
         } catch (err) {
         responseBox.textContent = "Error contacting server.";
         }
@@ -230,7 +240,13 @@
         const text = await res.text();
         console.log("Feedback response from backend:", text);
 
-        feedbackContainer.innerHTML = "<p>Thanks for your feedback!</p>";
+        feedbackSubmitted = true;
+
+        if(helpful === "Yes" || helpful === "No"){
+            feedbackContainer.style.display = "none";
+            feedbackThanks.style.display = "block";
+        }
+
       } catch (err) {
         console.error("Feedback error:", err);
       }
