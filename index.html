@@ -55,14 +55,14 @@
 </head>
 <body>
     <h2>Political Science 1026 Chatbot</h2>
-    <h5>***All responses are drawn directly from course material: syllabus responses use the syllabus only, EBO and Essay responses use the EBO and Essay Assignments Info only,
-        and midterm and final exam responses use the respective lecture materials only.</h5>
+    <h5>***All responses are drawn directly from course materials on the course website: syllabus responses come from the syllabus only, EBO and Essay responses use the EBO and Essay Assignments Info only,
+        and midterm and final exam responses use the respective lecture content only.</h5>
     <label for="botMode"><strong>Select a function:</strong></label>
     <select id="botMode">
-        <option value="syllabus">Syllabus Q&amp;A</option>
-        <option value="eboEssay">EBO & Essay Q&amp;A</option>
-        <option value="midterm">Midterm Q&amp;A</option>
-        <option value="final">Final Q&amp;A</option>
+        <option value="syllabus">Syllabus Questions</option>
+        <option value="eboEssay">EBO & Essay Questions</option>
+        <option value="midterm">Midterm content</option>
+        <option value="final">Final content</option>
     </select>
     <hr />
     <div id="notAvailableMesg" style="display: none;">
@@ -205,7 +205,7 @@
         lastQuery = payload.question;
 
         try {
-        const res = await fetch("https://work-study-syllabus-bot.deno.dev/", {
+        const res = await fetch("https://1026botall.deno.dev/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
