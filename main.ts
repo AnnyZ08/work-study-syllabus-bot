@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
+//import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const QUALTRICS_API_TOKEN = Deno.env.get("QUALTRICS_API_TOKEN");
@@ -33,7 +33,7 @@ async function loadFolderAsContext(folderPath: string): Promise<string> {
   return combined;
 }
 
-serve(async (req: Request): Promise<Response> => {
+Deno.serve(async (req: Request): Promise<Response> => {
 
     if (req.method === "GET") {
       return new Response("OK", {
